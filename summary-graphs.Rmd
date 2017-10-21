@@ -1,0 +1,185 @@
+---
+title: "FHRS/OSM comparison stats"
+output: html_document
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+# comment out line below if outputting html_notebook with code
+knitr::opts_chunk$set(echo=FALSE)
+
+knitr::opts_chunk$set(fig.width = 8, fig.height = 5)
+
+require(tidyverse)
+require(forcats)
+
+fhrs <- read_csv('combined.csv')
+
+# optional - just the Quarterly Project from 2016 Q4
+#fhrs <- fhrs %>%
+#  filter(date >= '2016-09-01', date <= '2016-12-31')
+
+good_colour <- '#5DA5DA'
+bad_colour <- '#F15854'
+```
+
+```{r total-fhrs}
+fhrs %>%
+  group_by(date) %>%
+  summarise(total_FHRS = sum(total_FHRS)) %>%
+  ggplot(aes(date, total_FHRS)) +
+  geom_smooth(method='loess') +
+  geom_line() +
+  labs(title='Change in total number of FHRS establishments over time',
+       x='Date', y='Number of establishments') +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+---
+
+```{r match-progress}
+fhrs %>%
+  group_by(date) %>%
+  summarise(PostcodeMatch = sum(matched)*100 / sum(total_FHRS),
+            PostcodeMismatch = sum(matched_postcode_error)*100 / sum(total_FHRS)) %>%
+  gather(key=Type, value=Percentage, -date) %>%
+  mutate(Type=fct_rev(Type)) %>%
+  ggplot(aes(date, Percentage, fill=Type)) +
+  geom_area() +
+  scale_fill_manual(values=c(bad_colour, good_colour)) +
+  labs(title='Percentage of FHRS establishments matched using fhrs:id tag',
+       x='Date') +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+* PostcodeMatch = FHRS postcode matches OSM `addr:postcode` tag
+* PostcodeMismatch = OSM `addr:postcode` tag missing or different from FHRS postcode
+
+---
+
+```{r postcode-progress}
+fhrs %>%
+  group_by(date) %>%
+  summarise(Percentage = (sum(matched) + sum(OSM_with_postcode)) * 100 / sum(total_OSM)) %>%
+  ggplot(aes(date, Percentage)) +
+  geom_line() +
+  labs(title='Percentage of relevant OSM entities with a non-mismatched postcode',
+      x='Date', y='% of relevant OSM entities') +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+A postcode is considered non-mismatched if:
+
+* an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the postcodes match
+* an OSM node/way has no `fhrs:id` tag but does have an `addr:postcode` tag
+
+---
+
+```{r matches-distribution}
+fhrs %>%
+  filter(date == max(date)) %>%
+  ggplot(aes(FHRS_matched_pc)) +
+  geom_histogram(breaks=seq(0,100,5)) +
+  scale_x_continuous(limits=c(0,100), breaks=seq(0,100,20)) +
+  labs(x='Percentage of FHRS establishments matched', y='Number of districts',
+       title='Histogram showing % of FHRS establishments matched') +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+---
+
+```{r postcode-distribution}
+fhrs %>%
+  filter(date == max(date)) %>%
+  ggplot(aes(OSM_matched_or_postcode_pc)) +
+  geom_histogram(breaks=seq(0,100,5)) +
+  scale_x_continuous(limits=c(0,100), breaks=seq(0,100,20)) +
+  labs(x='Percentage of relevant OSM entities with a non-mismatched postcode',
+       y='Number of districts',
+       title='Histogram showing % of relevant OSM entities with a non-mismatched postcode') +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+---
+
+```{r top-matches}
+fhrs %>%
+  filter(date == max(date)) %>%
+  mutate(PostcodeMatch = matched*100 / total_FHRS,
+         PostcodeMismatch = matched_postcode_error*100 / total_FHRS,
+         DistrictRank = rank(desc(PostcodeMatch + PostcodeMismatch), ties.method = 'min')) %>%
+  filter(DistrictRank <= 20) %>%
+  select(district_name, PostcodeMatch, PostcodeMismatch, DistrictRank) %>%
+  gather(key=Type, value=Percentage, -c(district_name, DistrictRank)) %>%
+  mutate(Type = fct_rev(Type)) %>%
+  ggplot(aes(fct_reorder(district_name, -DistrictRank), Percentage, fill=Type)) +
+  geom_col() +
+  scale_fill_manual(values=c(bad_colour, good_colour)) +
+  scale_y_continuous(limits=c(0,100)) +
+  labs(title='Top districts',
+       subtitle='by % of FHRS establishments matched using fhrs:id tag',
+       x='', y='Percentage of FHRS establishments matched') +
+  coord_flip() +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+* PostcodeMatch = FHRS postcode matches OSM `addr:postcode` tag
+* PostcodeMismatch = OSM `addr:postcode` tag missing or different from FHRS postcode
+
+---
+
+```{r top-postcodes}
+fhrs %>%
+  filter(date == max(date)) %>%
+  mutate(PostcodePC = OSM_with_postcode*100 / total_OSM,
+         DistrictRank = rank(desc(PostcodePC), ties.method = 'min')) %>%
+  filter(DistrictRank <= 20) %>%
+  ggplot(aes(fct_reorder(district_name, -DistrictRank), PostcodePC)) +
+  geom_col(fill=good_colour) +
+  scale_y_continuous(limits=c(0,100)) +
+  labs(title='Top districts',
+       subtitle='by % of OSM nodes/ways with a non-mismatched postcode',
+       x='', y='Percentage of OSM nodes/ways') +
+  guides(fill=FALSE) +
+  coord_flip() +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+A postcode is considered non-mismatched if:
+
+* an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the postcodes match
+* an OSM node/way has no `fhrs:id` tag but does have an `addr:postcode` tag
+
+---
+
+```{r top-mismatches}
+fhrs %>%
+  filter(date == max(date)) %>%
+  mutate(DistrictRank = rank(desc(mismatch), ties.method = 'min')) %>%
+  filter(DistrictRank <= 20) %>%
+  ggplot(aes(fct_reorder(district_name, -DistrictRank), mismatch)) +
+  geom_col(fill=bad_colour) +
+  labs(title='Districts with the most FHRS mismatches',
+       subtitle='by number of OSM nodes/ways with an unrecognised fhrs:id',
+       x='', y='Number of OSM nodes/ways') +
+  coord_flip() +
+  theme(plot.background=element_rect(colour='black'))
+```
+
+---
+
+```{r top-postcode-mismatch}
+fhrs %>%
+  filter(date == max(date)) %>%
+  mutate(DistrictRank = rank(desc(matched_postcode_error), ties.method = 'min')) %>%
+  filter(DistrictRank <= 20) %>%
+  ggplot(aes(fct_reorder(district_name, -DistrictRank), matched_postcode_error, fill='')) +
+  geom_col() +
+  scale_fill_manual(values=c(bad_colour)) +
+#  scale_y_log10() +
+  labs(title='Districts with the most missing/mismatched postcodes',
+       subtitle='by number of matched OSM nodes/ways with missing/mismatched addr:postcode',
+       x='', y='Number of OSM nodes/ways') +
+  guides(fill=FALSE) +
+  coord_flip() +
+  theme(plot.background=element_rect(colour='black'))
+```
