@@ -14,10 +14,6 @@ require(forcats)
 
 fhrs <- read_csv('combined.csv')
 
-# optional - just the Quarterly Project from 2016 Q4
-#fhrs <- fhrs %>%
-#  filter(date >= '2016-09-01', date <= '2016-12-31')
-
 good_colour <- '#5DA5DA'
 bad_colour <- '#F15854'
 ```
