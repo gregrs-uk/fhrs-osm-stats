@@ -27,7 +27,7 @@ fhrs %>%
   group_by(date) %>%
   summarise(total_FHRS = sum(total_FHRS)) %>%
   ggplot(aes(date, total_FHRS)) +
-  geom_smooth(method='loess') +
+#  geom_smooth(method='loess', span=0.25, se=FALSE) +
   geom_line() +
   labs(title='Change in total number of FHRS establishments over time',
        x='Date', y='Number of establishments') +
