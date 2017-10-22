@@ -4,8 +4,8 @@ require(scales)
 
 fhrs <- read_csv('combined.csv')
 # optional - test with only two districts
-fhrs <- fhrs %>%
-  filter(district_name %in% c('Warwick', 'Rugby'))
+#fhrs <- fhrs %>%
+#  filter(district_name %in% c('Warwick', 'Rugby'))
 
 good_colour <- '#5DA5DA'
 bad_colour <- '#F15854'
