@@ -17,21 +17,22 @@ height = 6
 
 fhrs_no_plots <- fhrs %>%
   group_by(district_id, district_name) %>%
-  select(district_id, district_name, date, total_FHRS, PostcodeMatch=matched,
-         PostcodeMismatch=matched_postcode_error) %>%
-  gather(key=Type, value=Establishments,
+  select(district_id, district_name, date, total_FHRS, Match=matched,
+         Mismatch=matched_postcode_error) %>%
+  gather(key=Postcode, value=Establishments,
          -c(district_id, district_name, date, total_FHRS)) %>%
-  mutate(Type=fct_rev(Type)) %>%
+  mutate(Postcode=fct_rev(Postcode)) %>%
   nest() %>%
   mutate(plot = map2(district_name, data,
                      ~ggplot(aes(x=date), data=.y) +
                        geom_line(aes(y=total_FHRS, colour='Total')) +
-                       geom_area(aes(y=Establishments, fill=Type)) +
+                       geom_area(aes(y=Establishments, fill=Postcode)) +
                        scale_color_manual(values='black', name='') +
-                       scale_fill_manual(values=c(bad_colour, good_colour), name='') +
+                       scale_fill_manual(values=c(bad_colour, good_colour)) +
                        scale_y_continuous(breaks=pretty_breaks()) +
-                       labs(title=paste('Number of FHRS establishments in', .x, 'over time'),
-                            subtitle='Total number of establishments and number matched in OSM',
+                       labs(title=paste('FHRS establishments in', .x),
+                            subtitle='Total number of establishments with a geocode and number matched in OSM',
+                            caption='Postcode match = FHRS postcode matches OSM addr:postcode or not:addr:postcode',
                             x='Date', y='Number of establishments') +
                        guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
   ))
@@ -45,20 +46,21 @@ map2(fhrs_no_plots$district_id, fhrs_no_plots$plot,
 
 fhrs_pc_plots <- fhrs %>%
   group_by(district_id, district_name) %>%
-  mutate(PostcodeMatch = matched*100 / total_FHRS,
-         PostcodeMismatch = matched_postcode_error*100 / total_FHRS) %>%
-  select(district_id, district_name, date, PostcodeMatch, PostcodeMismatch) %>%
-  gather(key=Type, value=Percentage,
+  mutate(Match = matched*100 / total_FHRS,
+         Mismatch = matched_postcode_error*100 / total_FHRS) %>%
+  select(district_id, district_name, date, Match, Mismatch) %>%
+  gather(key=Postcode, value=Percentage,
          -c(district_id, district_name, date)) %>%
-  mutate(Type=fct_rev(Type)) %>%
+  mutate(Postcode=fct_rev(Postcode)) %>%
   nest() %>%
   mutate(plot = map2(district_name, data,
                      ~ggplot(aes(x=date), data=.y) +
-                       geom_area(aes(y=Percentage, fill=Type)) +
+                       geom_area(aes(y=Percentage, fill=Postcode)) +
                        scale_color_manual(values='black', name='') +
-                       scale_fill_manual(values=c(bad_colour, good_colour), name='') +
+                       scale_fill_manual(values=c(bad_colour, good_colour)) +
                        scale_y_continuous(breaks=pretty_breaks()) +
-                       labs(title=paste('Percentage of FHRS establishments in', .x, 'matched over time'),
+                       labs(title=paste('Percentage of FHRS establishments matched in', .x),
+                            caption='Postcode match = FHRS postcode matches OSM addr:postcode or not:addr:postcode',
                             x='Date', y='% of FHRS establishments') +
                        guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
   ))
@@ -72,22 +74,22 @@ map2(fhrs_pc_plots$district_id, fhrs_pc_plots$plot,
 
 osm_no_plots <- fhrs %>%
   group_by(district_id, district_name) %>%
-  mutate(NonMismatched = matched + OSM_with_postcode,
-         PostcodeMismatch = matched_postcode_error) %>%
-  select(district_id, district_name, date, NonMismatched, PostcodeMismatch, total_OSM) %>%
-  gather(key=Type, value=Number,
+  mutate(NonMismatch = matched + OSM_with_postcode,
+         Mismatch = matched_postcode_error) %>%
+  select(district_id, district_name, date, NonMismatch, Mismatch, total_OSM) %>%
+  gather(key=Postcode, value=Number,
          -c(district_id, district_name, date, total_OSM)) %>%
-  mutate(Type=fct_rev(Type)) %>%
   nest() %>%
   mutate(plot = map2(district_name, data,
                      ~ggplot(aes(x=date), data=.y) +
                        geom_line(aes(y=total_OSM, colour='Total')) +
-                       geom_area(aes(y=Number, fill=Type)) +
+                       geom_area(aes(y=Number, fill=Postcode)) +
                        scale_colour_manual(values='black', name='') +
-                       scale_fill_manual(values=c(bad_colour, good_colour), name='') +
+                       scale_fill_manual(values=c(bad_colour, good_colour)) +
                        labs(x='Date', y='Number of OSM nodes/ways',
-                            title=paste('Number of relevant OSM nodes/ways in', .x, 'over time'),
-                            subtitle='Total number of relevant OSM nodes/ways and number with a postcode set') +
+                            title=paste('Relevant OSM nodes/ways in', .x),
+                            subtitle='Total number of relevant OSM nodes/ways and number with a postcode set',
+                            caption='Non-mismatch = OSM addr:postcode or not:addr:postcode matches FHRS postcode, or fhrs:id not set') +
                        guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
   ))
 
@@ -100,21 +102,21 @@ map2(osm_no_plots$district_id, osm_no_plots$plot,
 
 osm_pc_plots <- fhrs %>%
   group_by(district_id, district_name) %>%
-  mutate(NonMismatched = (matched + OSM_with_postcode) * 100 / total_OSM,
-         PostcodeMismatch = matched_postcode_error*100 / total_OSM) %>%
-  select(district_id, district_name, date, NonMismatched, PostcodeMismatch) %>%
-  gather(key=Type, value=Percentage,
+  mutate(NonMismatch = (matched + OSM_with_postcode) * 100 / total_OSM,
+         Mismatch = matched_postcode_error*100 / total_OSM) %>%
+  select(district_id, district_name, date, NonMismatch, Mismatch) %>%
+  gather(key=Postcode, value=Percentage,
          -c(district_id, district_name, date)) %>%
-  mutate(Type=fct_rev(Type)) %>%
   nest() %>%
   mutate(plot = map2(district_name, data,
                      ~ggplot(aes(x=date), data=.y) +
-                       geom_area(aes(y=Percentage, fill=Type)) +
+                       geom_area(aes(y=Percentage, fill=Postcode)) +
                        scale_color_manual(values='black', name='') +
-                       scale_fill_manual(values=c(bad_colour, good_colour), name='') +
+                       scale_fill_manual(values=c(bad_colour, good_colour)) +
                        scale_y_continuous(breaks=pretty_breaks()) +
-                       labs(title=paste('Percentage of relevant OSM nodes/ways in', .x, 'with a postcode over time'),
-                            x='Date', y='% of OSM nodes/ways') +
+                       labs(x='Date', y='% of OSM nodes/ways',
+                            title=paste('Percentage of relevant OSM nodes/ways with a postcode in', .x),
+                            caption='Non-mismatch = OSM addr:postcode or not:addr:postcode matches FHRS postcode, or fhrs:id not set') +
                        guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
   ))
 
