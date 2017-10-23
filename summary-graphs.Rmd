@@ -47,8 +47,8 @@ fhrs %>%
   theme(plot.background=element_rect(colour='black'))
 ```
 
-* PostcodeMatch = FHRS postcode matches OSM `addr:postcode` tag
-* PostcodeMismatch = OSM `addr:postcode` tag missing or different from FHRS postcode
+* PostcodeMatch = FHRS postcode matches OSM `addr:postcode` or `not:addr:postcode` tag
+* PostcodeMismatch = FHRS postcode doesn't match OSM `addr:postcode` or `not:addr:postcode` tag, or OSM `addr:postcode` tag missing
 
 ---
 
@@ -65,7 +65,7 @@ fhrs %>%
 
 A postcode is considered non-mismatched if:
 
-* an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the postcodes match
+* an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the FHRS postcode matches the OSM `addr:postcode` or `not:addr:postcode`
 * an OSM node/way has no `fhrs:id` tag but does have an `addr:postcode` tag
 
 ---
@@ -118,8 +118,8 @@ fhrs %>%
   theme(plot.background=element_rect(colour='black'))
 ```
 
-* PostcodeMatch = FHRS postcode matches OSM `addr:postcode` tag
-* PostcodeMismatch = OSM `addr:postcode` tag missing or different from FHRS postcode
+* PostcodeMatch = FHRS postcode matches OSM `addr:postcode` or `not:addr:postcode` tag
+* PostcodeMismatch = FHRS postcode doesn't match OSM `addr:postcode` or `not:addr:postcode` tag, or OSM `addr:postcode` tag missing
 
 ---
 
@@ -142,7 +142,7 @@ fhrs %>%
 
 A postcode is considered non-mismatched if:
 
-* an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the postcodes match
+* an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the FHRS postcode matches the OSM `addr:postcode` or `not:addr:postcode`
 * an OSM node/way has no `fhrs:id` tag but does have an `addr:postcode` tag
 
 ---
