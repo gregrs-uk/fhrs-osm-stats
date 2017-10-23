@@ -1,5 +1,5 @@
 ---
-title: "FHRS/OSM comparison stats"
+title: "FHRS/OSM comparison graphs"
 output: html_document
 ---
 
@@ -18,6 +18,8 @@ good_colour <- '#5DA5DA'
 bad_colour <- '#F15854'
 ```
 
+Below is a graph showing how the total number of [FHRS](http://ratings.food.gov.uk) establishments in the [comparison tool](http://gregrs.dev.openstreetmap.org/fhrs)'s database has changed over time.
+
 ```{r total-fhrs}
 fhrs %>%
   group_by(date) %>%
@@ -30,6 +32,14 @@ fhrs %>%
        x='Date', y='Number of establishments') +
   theme(plot.background=element_rect(colour='black'))
 ```
+
+Only [FHRS](http://ratings.food.gov.uk) establishments with a geocode can be used by the [FHRS/OSM comparison tool](http://gregrs.dev.openstreetmap.org/fhrs). As of `r format(max(fhrs$date), '%A %d %B %Y')`, there are `r fhrs %>% filter(date==max(date)) %>% summarise(sum(total_FHRS)) %>% pull() %>% format(big.mark=',')` of these establishments in the comparison tool's database.
+
+---
+
+## Progress graphs
+
+The graphs below show the progress made in matching [OSM](http://openstreetmap.org) nodes/ways to [FHRS](http://ratings.food.gov.uk) establishments using the [`fhrs:id` tag](http://wiki.openstreetmap.org/wiki/Key:fhrs:id) and adding [`addr:postcode` tags](http://wiki.openstreetmap.org/wiki/Key:addr:postcode) to relevant OSM nodes/ways. The progress in the first few months can be attributed to the [Quarterly Project for Autumn 2016](http://wiki.openstreetmap.org/wiki/UK_2016_Q4_Project:_Food_Hygiene_Ratings), which also has [its own page of graphs](http://gregrs.dev.openstreetmap.org/fhrs-stats/graphs-2016-Q4.html).
 
 ---
 
@@ -70,6 +80,12 @@ A postcode is considered non-mismatched if:
 
 * an OSM node/way is successfully matched to an FHRS establishment using the `fhrs:id` tag and the FHRS postcode matches the OSM `addr:postcode` or `not:addr:postcode`
 * an OSM node/way has no `fhrs:id` tag but does have an `addr:postcode` tag
+
+---
+
+## Current status graphs
+
+The graphs below show the current status as of `r format(max(fhrs$date), '%A %d %B %Y')`.
 
 ---
 
@@ -188,3 +204,7 @@ fhrs %>%
   coord_flip() +
   theme(plot.background=element_rect(colour='black'))
 ```
+
+---
+
+*Created by [Gregrs](https://wiki.openstreetmap.org/wiki/User:Gregrs) using [RMarkdown](http://rmarkdown.rstudio.com). Download code, report bugs or suggest improvements on [GitHub](https://github.com/gregrs-uk/fhrs-osm-stats).*
