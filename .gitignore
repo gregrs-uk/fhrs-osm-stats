@@ -1,5 +1,5 @@
 *.csv
 *.html
 *.png
-.Rproj.user/
 .Rhistory
+.Rproj.user
