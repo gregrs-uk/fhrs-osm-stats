@@ -34,7 +34,8 @@ fhrs_no_plots <- fhrs %>%
                             subtitle='Total number of establishments with a geocode and number matched in OSM',
                             caption='Postcode match = FHRS postcode matches OSM addr:postcode or not:addr:postcode',
                             x='Date', y='Number of establishments') +
-                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
+                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2)) +
+                       theme(plot.background=element_rect(colour='black'))
   ))
 
 map2(fhrs_no_plots$district_id, fhrs_no_plots$plot,
@@ -62,7 +63,8 @@ fhrs_pc_plots <- fhrs %>%
                        labs(title=paste('Percentage of FHRS establishments matched in', .x),
                             caption='Postcode match = FHRS postcode matches OSM addr:postcode or not:addr:postcode',
                             x='Date', y='% of FHRS establishments') +
-                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
+                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2)) +
+                       theme(plot.background=element_rect(colour='black'))
   ))
 
 map2(fhrs_pc_plots$district_id, fhrs_pc_plots$plot,
@@ -90,7 +92,8 @@ osm_no_plots <- fhrs %>%
                             title=paste('Relevant OSM nodes/ways in', .x),
                             subtitle='Total number of relevant OSM nodes/ways and number with a postcode set',
                             caption='Non-mismatch = OSM addr:postcode or not:addr:postcode matches FHRS postcode, or fhrs:id not set') +
-                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
+                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2)) +
+                       theme(plot.background=element_rect(colour='black'))
   ))
 
 map2(osm_no_plots$district_id, osm_no_plots$plot,
@@ -117,7 +120,8 @@ osm_pc_plots <- fhrs %>%
                        labs(x='Date', y='% of OSM nodes/ways',
                             title=paste('Percentage of relevant OSM nodes/ways with a postcode in', .x),
                             caption='Non-mismatch = OSM addr:postcode or not:addr:postcode matches FHRS postcode, or fhrs:id not set') +
-                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2))
+                       guides(colour=guide_legend(order=1), fill=guide_legend(order=2)) +
+                       theme(plot.background=element_rect(colour='black'))
   ))
 
 map2(osm_pc_plots$district_id, osm_pc_plots$plot,
