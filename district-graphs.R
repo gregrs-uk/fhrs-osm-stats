@@ -29,7 +29,7 @@ fhrs_no_plots <- fhrs %>%
                        geom_area(aes(y=Establishments, fill=Postcode)) +
                        scale_color_manual(values='black', name='') +
                        scale_fill_manual(values=c(bad_colour, good_colour)) +
-                       scale_y_continuous(breaks=pretty_breaks()) +
+                       scale_y_continuous(breaks=pretty_breaks(), limits=c(0,NA)) +
                        labs(title=paste('FHRS establishments in', .x),
                             subtitle='Total number of establishments with a geocode and number matched in OSM',
                             caption='Postcode match = FHRS postcode matches OSM addr:postcode or not:addr:postcode',
@@ -59,7 +59,7 @@ fhrs_pc_plots <- fhrs %>%
                        geom_area(aes(y=Percentage, fill=Postcode)) +
                        scale_color_manual(values='black', name='') +
                        scale_fill_manual(values=c(bad_colour, good_colour)) +
-                       scale_y_continuous(breaks=pretty_breaks()) +
+                       scale_y_continuous(breaks=pretty_breaks(), limits=c(0,NA)) +
                        labs(title=paste('Percentage of FHRS establishments matched in', .x),
                             caption='Postcode match = FHRS postcode matches OSM addr:postcode or not:addr:postcode',
                             x='Date', y='% of FHRS establishments') +
@@ -88,6 +88,7 @@ osm_no_plots <- fhrs %>%
                        geom_area(aes(y=Number, fill=Postcode)) +
                        scale_colour_manual(values='black', name='') +
                        scale_fill_manual(values=c(bad_colour, good_colour)) +
+                       scale_y_continuous(breaks=pretty_breaks(), limits=c(0,NA)) +
                        labs(x='Date', y='Number of OSM nodes/ways',
                             title=paste('Relevant OSM nodes/ways in', .x),
                             subtitle='Total number of relevant OSM nodes/ways and number with a postcode set',
@@ -116,7 +117,7 @@ osm_pc_plots <- fhrs %>%
                        geom_area(aes(y=Percentage, fill=Postcode)) +
                        scale_color_manual(values='black', name='') +
                        scale_fill_manual(values=c(bad_colour, good_colour)) +
-                       scale_y_continuous(breaks=pretty_breaks()) +
+                       scale_y_continuous(breaks=pretty_breaks(), limits=c(0,NA)) +
                        labs(x='Date', y='% of OSM nodes/ways',
                             title=paste('Percentage of relevant OSM nodes/ways with a postcode in', .x),
                             caption='Non-mismatch = OSM addr:postcode or not:addr:postcode matches FHRS postcode, or fhrs:id not set') +
