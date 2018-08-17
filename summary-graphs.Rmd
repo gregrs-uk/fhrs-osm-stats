@@ -9,8 +9,9 @@ knitr::opts_chunk$set(echo=FALSE)
 
 knitr::opts_chunk$set(fig.width = 8, fig.height = 5)
 
-require(tidyverse)
-require(forcats)
+library(tidyverse)
+library(forcats)
+library(scales)
 
 fhrs <- read_csv('combined.csv')
 
@@ -135,7 +136,7 @@ fhrs %>%
   ggplot(aes(fct_reorder(district_name, -DistrictRank), Percentage, fill=Postcode)) +
   geom_col() +
   scale_fill_manual(values=c(bad_colour, good_colour)) +
-  scale_y_continuous(limits=c(0,100)) +
+  scale_y_continuous(limits = c(0,100), breaks = pretty_breaks()) +
   labs(title='Top districts',
        subtitle='by percentage of FHRS establishments matched using fhrs:id tag',
        x='', y='% of FHRS establishments matched') +
@@ -151,12 +152,12 @@ fhrs %>%
 ```{r top-postcodes}
 fhrs %>%
   filter(date == max(date)) %>%
-  mutate(PostcodePC = OSM_with_postcode*100 / total_OSM,
+  mutate(PostcodePC = OSM_matched_or_postcode_pc,
          DistrictRank = rank(desc(PostcodePC), ties.method = 'min')) %>%
   filter(DistrictRank <= 20) %>%
   ggplot(aes(fct_reorder(district_name, -DistrictRank), PostcodePC)) +
   geom_col(fill=good_colour) +
-  scale_y_continuous(limits=c(0,100)) +
+  scale_y_continuous(limits = c(0,100), breaks = pretty_breaks()) +
   labs(title='Top districts',
        subtitle='by percentage of OSM nodes/ways with a non-mismatched postcode',
        x='', y='% of OSM nodes/ways with a non-mismatched postcode') +
