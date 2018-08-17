@@ -151,7 +151,7 @@ fhrs %>%
 ```{r top-postcodes}
 fhrs %>%
   filter(date == max(date)) %>%
-  mutate(PostcodePC = OSM_with_postcode*100 / total_OSM,
+  mutate(PostcodePC = OSM_matched_or_postcode_pc,
          DistrictRank = rank(desc(PostcodePC), ties.method = 'min')) %>%
   filter(DistrictRank <= 20) %>%
   ggplot(aes(fct_reorder(district_name, -DistrictRank), PostcodePC)) +
