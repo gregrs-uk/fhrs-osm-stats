@@ -1,8 +1,10 @@
-require(tidyverse)
-require(forcats)
-require(scales)
+cat("Creating district graphs\n")
 
-fhrs <- read_csv('combined.csv')
+suppressMessages(library(tidyverse))
+library(forcats)
+suppressMessages(library(scales))
+
+suppressMessages(fhrs <- read_csv('combined.csv'))
 # optional - test with only two districts
 fhrs <- fhrs %>%
   filter(district_name %in% c('Warwick', 'Rugby'))
@@ -38,7 +40,7 @@ fhrs_no_plots <- fhrs %>%
                        theme(plot.background=element_rect(colour='black'))
   ))
 
-map2(fhrs_no_plots$district_id, fhrs_no_plots$plot,
+walk2(fhrs_no_plots$district_id, fhrs_no_plots$plot,
      ~ggsave(file=file.path('district-graphs', paste0('fhrs-no-', .x, '.png')),
              plot=.y, width=width, height=height))
 
@@ -67,7 +69,7 @@ fhrs_pc_plots <- fhrs %>%
                        theme(plot.background=element_rect(colour='black'))
   ))
 
-map2(fhrs_pc_plots$district_id, fhrs_pc_plots$plot,
+walk2(fhrs_pc_plots$district_id, fhrs_pc_plots$plot,
      ~ggsave(file=file.path('district-graphs', paste0('fhrs-pc-', .x, '.png')),
              plot=.y, width=width, height=height))
 
@@ -97,7 +99,7 @@ osm_no_plots <- fhrs %>%
                        theme(plot.background=element_rect(colour='black'))
   ))
 
-map2(osm_no_plots$district_id, osm_no_plots$plot,
+walk2(osm_no_plots$district_id, osm_no_plots$plot,
      ~ggsave(file=file.path('district-graphs', paste0('osm-no-', .x, '.png')),
              plot=.y, width=width, height=height))
 
@@ -125,6 +127,8 @@ osm_pc_plots <- fhrs %>%
                        theme(plot.background=element_rect(colour='black'))
   ))
 
-map2(osm_pc_plots$district_id, osm_pc_plots$plot,
+walk2(osm_pc_plots$district_id, osm_pc_plots$plot,
      ~ggsave(file=file.path('district-graphs', paste0('osm-pc-', .x, '.png')),
              plot=.y, width=width, height=height))
+
+cat("Finished creating district graphs\n")
